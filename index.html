@@ -1,1 +1,54 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NaijaConnect - by Rabiu</title>
+<style>
+body{font-family:sans-serif;background:#f0f2f5;margin:0;padding:10px}
+.top{background:#1877f2;color:white;padding:15px;text-align:center;font-size:22px;font-weight:bold;border-radius:10px}
+.card{background:white;padding:15px;border-radius:10px;margin-top:10px}
+input,textarea{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:8px;box-sizing:border-box}
+button{background:#1877f2;color:white;border:none;padding:10px 15px;border-radius:8px;font-weight:bold}
+.post{border-top:1px solid #eee;padding:10px 0}
+.post img{width:100%;border-radius:10px;margin-top:8px}
+.small{background:#eee;color:#333}
+</style>
+</head>
+<body>
+<div class="top">NaijaConnect 🇳🇬<br><small style="font-size:12px">Built by Rabiu</small></div>
+<div class="card" id="loginBox">
+<h3>Login / Sign Up</h3>
+<input id="username" placeholder="Your name">
+<button onclick="login()">Enter App</button>
+</div>
+<div class="card" id="app" style="display:none">
+<h3 id="welcome"></h3>
+<textarea id="postText" placeholder="Wetin dey your mind?"></textarea>
+<input type="file" id="postImg" accept="image/*">
+<button onclick="makePost()">Post</button>
+<button class="small" onclick="logout()">Logout</button>
+<div id="feed"></div>
+</div>
+<script>
+let user = localStorage.getItem('nc_user');
+let posts = JSON.parse(localStorage.getItem('nc_posts') || '[]');
+if(user){ showApp(); }
+function login(){ let n=document.getElementById('username').value; if(!n) return alert('Put your name'); localStorage.setItem('nc_user',n); user=n; showApp(); }
+function logout(){ localStorage.removeItem('nc_user'); location.reload(); }
+function showApp(){ document.getElementById('loginBox').style.display='none'; document.getElementById('app').style.display='block'; document.getElementById('welcome').innerText='Welcome, '+user+' 👋'; render(); }
+function makePost(){
+  let t=document.getElementById('postText').value;
+  let f=document.getElementById('postImg').files[0];
+  if(!t && !f) return;
+  if(f){ let r=new FileReader(); r.onload=function(e){ savePost(t,e.target.result); }; r.readAsDataURL(f); } else { savePost(t,''); }
+}
+function savePost(t,img){ posts.unshift({name:user,text:t,img:img,likes:0,comments:[]}); localStorage.setItem('nc_posts',JSON.stringify(posts)); document.getElementById('postText').value=''; document.getElementById('postImg').value=''; render(); }
+function render(){
+  let f=document.getElementById('feed');
+  f.innerHTML=posts.map((p,i)=>`<div class="post"><b>${p.name}</b><p>${p.text}</p>${p.img?`<img src="${p.img}">`:''}<br><button onclick="like(${i})">👍 Like (${p.likes})</button><p>💬 ${p.comments.join(' | ')}</p><input id="c${i}" placeholder="Comment..."><button onclick="comment(${i})">Send</button></div>`).join('') || '<p>No posts yet.</p>';
+}
+function like(i){ posts[i].likes++; localStorage.setItem('nc_posts',JSON.stringify(posts)); render(); }
+function comment(i){ let v=document.getElementById('c'+i).value; if(!v) return; posts[i].comments.push(user+': '+v); localStorage.setItem('nc_posts',JSON.stringify(posts)); render(); }
+</script>
+</body>
+</html>
