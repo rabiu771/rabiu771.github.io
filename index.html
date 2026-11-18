@@ -1,54 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NaijaConnect - by Rabiu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaijaConnect 🇳🇬</title>
 <style>
-body{font-family:sans-serif;background:#f0f2f5;margin:0;padding:10px}
-.top{background:#1877f2;color:white;padding:15px;text-align:center;font-size:22px;font-weight:bold;border-radius:10px}
-.card{background:white;padding:15px;border-radius:10px;margin-top:10px}
-input,textarea{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:8px;box-sizing:border-box}
-button{background:#1877f2;color:white;border:none;padding:10px 15px;border-radius:8px;font-weight:bold}
-.post{border-top:1px solid #eee;padding:10px 0}
-.post img{width:100%;border-radius:10px;margin-top:8px}
-.small{background:#eee;color:#333}
+*{box-sizing:border-box} body{margin:0;font-family:Arial;background:#f0f2f5;color:#111}
+body.dark{background:#18191a;color:#eee}
+header{background:#008751;color:white;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+header b{font-size:20px} header button{background:white;color:#008751;border:none;padding:7px 12px;border-radius:20px;font-weight:bold;cursor:pointer}
+.container{max-width:550px;margin:auto;padding:12px}
+.card{background:white;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+body.dark .card{background:#242526}
+input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin:5px 0;font-size:15px}
+body.dark input,body.dark textarea{background:#3a3b3c;color:white;border-color:#555}
+.post-btn{background:#008751;color:white;border:none;padding:11px;border-radius:8px;width:100%;font-weight:bold;font-size:16px;cursor:pointer}
+.post{display:flex;gap:10px}
+.avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;background:#ddd;flex-shrink:0}
+.post-img{width:100%;border-radius:10px;margin-top:8px;max-height:400px;object-fit:cover}
+.actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.actions button{border:none;background:#f0f2f5;padding:7px 12px;border-radius:20px;cursor:pointer}
+body.dark .actions button{background:#3a3b3c;color:white}
+.del{color:red!important;background:#ffe5e5!important}
+.top-profile{display:flex;align-items:center;gap:10px}
+.top-profile img{width:60px;height:60px;border-radius:50%;object-fit:cover;background:#ddd}
 </style>
 </head>
 <body>
-<div class="top">NaijaConnect 🇳🇬<br><small style="font-size:12px">Built by Rabiu</small></div>
-<div class="card" id="loginBox">
-<h3>Login / Sign Up</h3>
-<input id="username" placeholder="Your name">
-<button onclick="login()">Enter App</button>
+<header><b>🇳🇬 NaijaConnect</b><button onclick="toggleDark()">🌙 Dark</button></header>
+<div class="container">
+
+<div class="card">
+<div class="top-profile">
+<img id="myAvatar" src="https://via.placeholder.com/60">
+<div><b>Your Profile</b><br><small>Set your name & picture once</small></div>
 </div>
-<div class="card" id="app" style="display:none">
-<h3 id="welcome"></h3>
-<textarea id="postText" placeholder="Wetin dey your mind?"></textarea>
-<input type="file" id="postImg" accept="image/*">
-<button onclick="makePost()">Post</button>
-<button class="small" onclick="logout()">Logout</button>
+<input id="myName" placeholder="Your Name e.g Rabiu" oninput="saveProfile()">
+<input type="file" accept="image/*" onchange="setAvatar(event)">
+</div>
+
+<div class="card">
+<textarea id="postText" rows="3" placeholder="Wetin dey happen, Naija? 🇳🇬"></textarea>
+<input type="file" id="postImage" accept="image/*">
+<button class="post-btn" onclick="addPost()">Post Am! 🚀</button>
+</div>
+
 <div id="feed"></div>
 </div>
+
 <script>
-let user = localStorage.getItem('nc_user');
-let posts = JSON.parse(localStorage.getItem('nc_posts') || '[]');
-if(user){ showApp(); }
-function login(){ let n=document.getElementById('username').value; if(!n) return alert('Put your name'); localStorage.setItem('nc_user',n); user=n; showApp(); }
-function logout(){ localStorage.removeItem('nc_user'); location.reload(); }
-function showApp(){ document.getElementById('loginBox').style.display='none'; document.getElementById('app').style.display='block'; document.getElementById('welcome').innerText='Welcome, '+user+' 👋'; render(); }
-function makePost(){
-  let t=document.getElementById('postText').value;
-  let f=document.getElementById('postImg').files[0];
-  if(!t && !f) return;
-  if(f){ let r=new FileReader(); r.onload=function(e){ savePost(t,e.target.result); }; r.readAsDataURL(f); } else { savePost(t,''); }
+let myName = localStorage.getItem('nc_name')||'';
+let myAvatar = localStorage.getItem('nc_avatar')||'https://via.placeholder.com/60';
+document.getElementById('myName').value=myName;
+document.getElementById('myAvatar').src=myAvatar;
+if(localStorage.getItem('nc_dark')=='1') document.body.classList.add('dark');
+
+function saveProfile(){
+  myName=document.getElementById('myName').value;
+  localStorage.setItem('nc_name',myName);
 }
-function savePost(t,img){ posts.unshift({name:user,text:t,img:img,likes:0,comments:[]}); localStorage.setItem('nc_posts',JSON.stringify(posts)); document.getElementById('postText').value=''; document.getElementById('postImg').value=''; render(); }
+function setAvatar(e){
+  let r=new FileReader();
+  r.onload=()=>{myAvatar=r.result;localStorage.setItem('nc_avatar',myAvatar);document.getElementById('myAvatar').src=myAvatar;};
+  r.readAsDataURL(e.target.files[0]);
+}
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  localStorage.setItem('nc_dark',document.body.classList.contains('dark')?'1':'0');
+}
+let posts = JSON.parse(localStorage.getItem('nc_posts')||'[]');
+function addPost(){
+  let text=document.getElementById('postText').value.trim();
+  let file=document.getElementById('postImage').files[0];
+  if(!text && !file) return alert('Write something or add picture');
+  if(file){
+    let r=new FileReader();
+    r.onload=()=>{savePost(text,r.result);};
+    r.readAsDataURL(file);
+  } else savePost(text,'');
+}
+function savePost(text,img){
+  posts.unshift({name:myName||'Anonymous',avatar:myAvatar,text:text,img:img,likes:0,love:0,laugh:0,time:new Date().toLocaleString()});
+  localStorage.setItem('nc_posts',JSON.stringify(posts));
+  document.getElementById('postText').value='';
+  document.getElementById('postImage').value='';
+  render();
+}
+function delPost(i){ if(confirm('Delete this post?')){posts.splice(i,1);localStorage.setItem('nc_posts',JSON.stringify(posts));render();} }
+function react(i,type){ posts[i][type]++; localStorage.setItem('nc_posts',JSON.stringify(posts)); render(); }
 function render(){
   let f=document.getElementById('feed');
-  f.innerHTML=posts.map((p,i)=>`<div class="post"><b>${p.name}</b><p>${p.text}</p>${p.img?`<img src="${p.img}">`:''}<br><button onclick="like(${i})">👍 Like (${p.likes})</button><p>💬 ${p.comments.join(' | ')}</p><input id="c${i}" placeholder="Comment..."><button onclick="comment(${i})">Send</button></div>`).join('') || '<p>No posts yet.</p>';
+  if(posts.length==0) f.innerHTML='<div class="card" style="text-align:center">No post yet. Be the first! 🇳🇬</div>';
+  else f.innerHTML=posts.map((p,i)=>`
+  <div class="card">
+    <div class="post"><img class="avatar" src="${p.avatar}"><div><b>${p.name}</b><br><small>${p.time}</small><p style="margin:8px 0">${p.text}</p></div></div>
+    ${p.img?`<img class="post-img" src="${p.img}">`:''}
+    <div class="actions">
+      <button onclick="react(${i},'likes')">👍 Like ${p.likes}</button>
+      <button onclick="react(${i},'love')">❤️ Love ${p.love}</button>
+      <button onclick="react(${i},'laugh')">😂 Laugh ${p.laugh}</button>
+      <button class="del" onclick="delPost(${i})">🗑️ Delete</button>
+    </div>
+  </div>`).join('');
 }
-function like(i){ posts[i].likes++; localStorage.setItem('nc_posts',JSON.stringify(posts)); render(); }
-function comment(i){ let v=document.getElementById('c'+i).value; if(!v) return; posts[i].comments.push(user+': '+v); localStorage.setItem('nc_posts',JSON.stringify(posts)); render(); }
+render();
 </script>
 </body>
 </html>
