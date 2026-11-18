@@ -29,7 +29,6 @@ body.dark .actions button{background:#3a3b3c;color:white}
 <body>
 <header><b>🇳🇬 NaijaConnect</b><button onclick="toggleDark()">🌙 Dark</button></header>
 <div class="container">
-
 <div class="card">
 <div class="top-profile">
 <img id="myAvatar" src="https://via.placeholder.com/60">
@@ -38,71 +37,30 @@ body.dark .actions button{background:#3a3b3c;color:white}
 <input id="myName" placeholder="Your Name e.g Rabiu" oninput="saveProfile()">
 <input type="file" accept="image/*" onchange="setAvatar(event)">
 </div>
-
 <div class="card">
 <textarea id="postText" rows="3" placeholder="Wetin dey happen, Naija? 🇳🇬"></textarea>
 <input type="file" id="postImage" accept="image/*">
 <button class="post-btn" onclick="addPost()">Post Am! 🚀</button>
 </div>
-
 <div id="feed"></div>
 </div>
-
 <script>
 let myName = localStorage.getItem('nc_name')||'';
 let myAvatar = localStorage.getItem('nc_avatar')||'https://via.placeholder.com/60';
 document.getElementById('myName').value=myName;
 document.getElementById('myAvatar').src=myAvatar;
 if(localStorage.getItem('nc_dark')=='1') document.body.classList.add('dark');
-
-function saveProfile(){
-  myName=document.getElementById('myName').value;
-  localStorage.setItem('nc_name',myName);
-}
-function setAvatar(e){
-  let r=new FileReader();
-  r.onload=()=>{myAvatar=r.result;localStorage.setItem('nc_avatar',myAvatar);document.getElementById('myAvatar').src=myAvatar;};
-  r.readAsDataURL(e.target.files[0]);
-}
-function toggleDark(){
-  document.body.classList.toggle('dark');
-  localStorage.setItem('nc_dark',document.body.classList.contains('dark')?'1':'0');
-}
+function saveProfile(){ myName=document.getElementById('myName').value; localStorage.setItem('nc_name',myName); }
+function setAvatar(e){ let r=new FileReader(); r.onload=()=>{myAvatar=r.result;localStorage.setItem('nc_avatar',myAvatar);document.getElementById('myAvatar').src=myAvatar;}; r.readAsDataURL(e.target.files[0]); }
+function toggleDark(){ document.body.classList.toggle('dark'); localStorage.setItem('nc_dark',document.body.classList.contains('dark')?'1':'0'); }
 let posts = JSON.parse(localStorage.getItem('nc_posts')||'[]');
-function addPost(){
-  let text=document.getElementById('postText').value.trim();
-  let file=document.getElementById('postImage').files[0];
-  if(!text && !file) return alert('Write something or add picture');
-  if(file){
-    let r=new FileReader();
-    r.onload=()=>{savePost(text,r.result);};
-    r.readAsDataURL(file);
-  } else savePost(text,'');
-}
-function savePost(text,img){
-  posts.unshift({name:myName||'Anonymous',avatar:myAvatar,text:text,img:img,likes:0,love:0,laugh:0,time:new Date().toLocaleString()});
-  localStorage.setItem('nc_posts',JSON.stringify(posts));
-  document.getElementById('postText').value='';
-  document.getElementById('postImage').value='';
-  render();
-}
+posts = posts.map(p => ({name:p.name||'Anonymous', avatar:p.avatar||'https://via.placeholder.com/60', text:p.text||'', img:p.img||'', likes:p.likes||0, love:p.love||0, laugh:p.laugh||0, time:p.time||'Just now'}));
+localStorage.setItem('nc_posts', JSON.stringify(posts));
+function addPost(){ let text=document.getElementById('postText').value.trim(); let file=document.getElementById('postImage').files[0]; if(!text && !file) return alert('Write something or add picture'); if(file){ let r=new FileReader(); r.onload=()=>{savePost(text,r.result);}; r.readAsDataURL(file); } else savePost(text,''); }
+function savePost(text,img){ posts.unshift({name:myName||'Anonymous',avatar:myAvatar,text:text,img:img,likes:0,love:0,laugh:0,time:new Date().toLocaleString()}); localStorage.setItem('nc_posts',JSON.stringify(posts)); document.getElementById('postText').value=''; document.getElementById('postImage').value=''; render(); }
 function delPost(i){ if(confirm('Delete this post?')){posts.splice(i,1);localStorage.setItem('nc_posts',JSON.stringify(posts));render();} }
 function react(i,type){ posts[i][type]++; localStorage.setItem('nc_posts',JSON.stringify(posts)); render(); }
-function render(){
-  let f=document.getElementById('feed');
-  if(posts.length==0) f.innerHTML='<div class="card" style="text-align:center">No post yet. Be the first! 🇳🇬</div>';
-  else f.innerHTML=posts.map((p,i)=>`
-  <div class="card">
-    <div class="post"><img class="avatar" src="${p.avatar}"><div><b>${p.name}</b><br><small>${p.time}</small><p style="margin:8px 0">${p.text}</p></div></div>
-    ${p.img?`<img class="post-img" src="${p.img}">`:''}
-    <div class="actions">
-      <button onclick="react(${i},'likes')">👍 Like ${p.likes}</button>
-      <button onclick="react(${i},'love')">❤️ Love ${p.love}</button>
-      <button onclick="react(${i},'laugh')">😂 Laugh ${p.laugh}</button>
-      <button class="del" onclick="delPost(${i})">🗑️ Delete</button>
-    </div>
-  </div>`).join('');
-}
+function render(){ let f=document.getElementById('feed'); if(posts.length==0) f.innerHTML='<div class="card" style="text-align:center">No post yet. Be the first! 🇳🇬</div>'; else f.innerHTML=posts.map((p,i)=>`<div class="card"><div class="post"><img class="avatar" src="${p.avatar}"><div><b>${p.name}</b><br><small>${p.time}</small><p style="margin:8px 0">${p.text}</p></div></div>${p.img?`<img class="post-img" src="${p.img}">`:''}<div class="actions"><button onclick="react(${i},'likes')">👍 Like ${p.likes||0}</button><button onclick="react(${i},'love')">❤️ Love ${p.love||0}</button><button onclick="react(${i},'laugh')">😂 Laugh ${p.laugh||0}</button><button class="del" onclick="delPost(${i})">🗑️ Delete</button></div></div>`).join(''); }
 render();
 </script>
 </body>
