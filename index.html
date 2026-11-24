@@ -1,91 +1,72 @@
 
-* {
-  box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-body {
-  margin: 0;
-  background: #050b18;
-  color: white;
-  font-family: Arial, sans-serif;
-}
+  <title>ROBOT - Personal AI Assistant</title>
 
-.app {
-  text-align: center;
-  padding: 35px 20px;
-  max-width: 500px;
-  margin: auto;
-}
+  <link rel="stylesheet" href="style.css">
 
-h1 {
-  color: #00cfff;
-  letter-spacing: 8px;
-  font-size: 38px;
-}
+  <script src="script.js" defer></script>
+</head>
 
-.subtitle {
-  color: #7896ad;
-  font-size: 11px;
-  letter-spacing: 3px;
-}
+<body>
 
-.orb {
-  width: 190px;
-  height: 190px;
-  border-radius: 50%;
-  margin: 55px auto 30px;
-  background: radial-gradient(circle, #087bff, #06152e 70%);
-  box-shadow: 0 0 35px #008cff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  <main class="app">
 
-.inner-orb {
-  width: 115px;
-  height: 115px;
-  border-radius: 50%;
-  background: #071d40;
-  border: 2px solid #00cfff;
-  display: grid;
-  place-items: center;
-  font-size: 55px;
-  color: #00cfff;
-  box-shadow: 0 0 25px #00aaff;
-}
+    <header>
+      <h1>ROBOT</h1>
+      <p class="subtitle">YOUR PERSONAL AI ASSISTANT</p>
+    </header>
 
-#status {
-  color: #00d9ff;
-  margin: 25px;
-  font-size: 13px;
-}
+    <section class="assistant">
 
-button {
-  background: #007bff;
-  color: white;
-  border: 0;
-  padding: 16px;
-  border-radius: 30px;
-  width: 100%;
-  margin: 10px 0;
-  font-weight: bold;
-}
+      <div class="orb">
+        <div class="inner-orb">R</div>
+      </div>
 
-.chat {
-  background: #101e32;
-  border: 1px solid #16466b;
-  border-radius: 15px;
-  padding: 15px;
-  margin-top: 25px;
-  min-height: 75px;
-}
+      <p id="status">ROBOT IS READY</p>
 
-input {
-  width: 100%;
-  padding: 15px;
-  margin-top: 20px;
-  border-radius: 10px;
-  border: 1px solid #087bff;
-  background: #101e32;
-  color: white;
-}
+      <button id="mic" type="button">
+        🎙️ TALK TO ROBOT
+      </button>
+
+    </section>
+
+    <section class="conversation">
+
+      <h2>Conversation</h2>
+
+      <div class="chat">
+        <p id="response">
+          Hello! I am ROBOT. How can I help you?
+        </p>
+      </div>
+
+      <div class="message-box">
+
+        <input
+          id="message"
+          type="text"
+          placeholder="Talk to ROBOT..."
+        >
+
+        <button id="send" type="button">
+          SEND
+        </button>
+
+      </div>
+
+    </section>
+
+    <footer>
+      <p>ROBOT AI SYSTEM © 2026</p>
+    </footer>
+
+  </main>
+
+</body>
+</html>
+
