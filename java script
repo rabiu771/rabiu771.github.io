@@ -1,0 +1,87 @@
+
+const mic = document.getElementById("mic");
+const send = document.getElementById("send");
+const message = document.getElementById("message");
+const response = document.getElementById("response");
+const status = document.getElementById("status");
+
+function speak(text) {
+  speechSynthesis.cancel();
+
+  const voice = new SpeechSynthesisUtterance(text);
+  voice.lang = "en-US";
+  voice.rate = 1;
+
+  speechSynthesis.speak(voice);
+}
+
+function reply(text) {
+  const question = text.toLowerCase();
+
+  let answer = "I heard you. I am ROBOT, and I am ready to help you.";
+
+  if (question.includes("hello") || question.includes("hi")) {
+    answer = "Hello! It's wonderful to hear from you.";
+  } else if (question.includes("your name")) {
+    answer = "My name is ROBOT, your personal AI assistant.";
+  } else if (question.includes("who created you")) {
+    answer = "You are my creator. We are building me together.";
+  } else if (question.includes("how are you")) {
+    answer = "I am functioning perfectly. How can I help you?";
+  } else if (question.includes("time")) {
+    answer = "The time is " +
+      new Date().toLocaleTimeString();
+  }
+
+  response.textContent = answer;
+  speak(answer);
+  status.textContent = "ROBOT IS RESPONDING";
+}
+
+send.onclick = () => {
+  if (message.value.trim()) {
+    reply(message.value);
+    message.value = "";
+  }
+};
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+mic.onclick = () => {
+  if (!SpeechRecognition) {
+    status.textContent =
+      "VOICE RECOGNITION NOT SUPPORTED. PLEASE TYPE.";
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    status.textContent = "ROBOT IS LISTENING...";
+  };
+
+  recognition.onresult = (event) => {
+    const words =
+      event.results[0][0].transcript;
+
+    message.value = words;
+    reply(words);
+  };
+
+  recognition.onerror = () => {
+    status.textContent =
+      "VOICE ERROR. PLEASE TRY AGAIN.";
+  };
+
+  recognition.onend = () => {
+    if (status.textContent === "ROBOT IS LISTENING...") {
+      status.textContent = "ROBOT IS READY";
+    }
+  };
+
+  recognition.start();
+};
