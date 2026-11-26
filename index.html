@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Connect - Connect With People</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+  body{background:#f0f4ff}
+  header{background:#0033cc;color:white;padding:25px;text-align:center}
+  header h1{font-size:30px}
+  nav{background:#111;padding:12px;text-align:center;position:sticky;top:0;z-index:10}
+  nav a{color:white;text-decoration:none;margin:0 10px;font-weight:bold;cursor:pointer}
+  nav button{padding:7px 14px;border:none;border-radius:20px;cursor:pointer;font-weight:bold}
+  .hero{background:linear-gradient(90deg,#0033cc,#00ccff);color:white;padding:30px 20px;text-align:center}
+  .hero input{width:90%;max-width:400px;padding:12px;border:none;border-radius:20px;margin-top:12px}
+  .box{background:white;padding:20px;margin:20px;border-radius:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+  .box input{width:90%;max-width:400px;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px}
+  .box button{background:#0033cc;color:white;border:none;padding:12px 25px;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px}
+  .people{display:flex;flex-wrap:wrap;justify-content:center;gap:15px;padding:10px 20px}
+  .person{background:white;width:230px;padding:18px;border-radius:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+  .avatar{width:70px;height:70px;background:#0033cc;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 10px}
+  .person h3{font-size:18px}
+  .person p{color:#666;font-size:13px;margin:5px 0}
+  .person button{padding:9px 15px;border:none;border-radius:20px;cursor:pointer;font-weight:bold;margin-top:8px;width:100%}
+  .connect{background:#0033cc;color:white}
+  .connected{background:#00c853;color:white}
+  .chat{background:#ffcc00}
+  #chatBox{display:none;background:white;margin:20px;border-radius:12px;padding:20px}
+  #messages{height:200px;overflow-y:auto;border:1px solid #ddd;padding:10px;border-radius:8px;text-align:left;margin-bottom:10px;background:#f9f9f9}
+  #chatInput{width:75%;padding:12px;border:1px solid #ccc;border-radius:8px}
+  #sendBtn{width:20%;padding:12px;background:#0033cc;color:white;border:none;border-radius:8px;cursor:pointer}
+  footer{background:#111;color:white;text-align:center;padding:15px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌍 GLOBAL CONNECT</h1>
+  <p>Connect With People By Username | Owner: Rabiu</p>
+</header>
+
+<nav>
+  <a href="#">Home</a>
+  <a href="#people">People</a>
+  <a href="#friends">My Friends (<span id="friendCount">0</span>)</a>
+  <button onclick="openChat('')">💬 My Chats</button>
+</nav>
+
+<div class="hero">
+  <h2>Find People By Username</h2>
+  <p>Search @username, connect, chat - like Instagram</p>
+  <input type="text" id="searchUser" onkeyup="searchPeople()" placeholder="🔍 Search username... e.g @rabiu, @fatima">
+</div>
+
+<div class="box">
+  <h2>Create Your Profile</h2>
+  <p>Your username na how people go find you</p>
+  <input type="text" id="myName" placeholder="Your Full Name e.g Rabiu"><br>
+  <input type="text" id="myUsername" placeholder="Choose Username e.g @rabiu"><br>
+  <button onclick="createProfile()">Create My Username ✅</button>
+  <p id="myProfile" style="color:green;font-weight:bold;margin-top:10px"></p>
+</div>
+
+<div class="box" id="friends">
+  <h2>👥 My Connections</h2>
+  <p id="friendList">You never connect with anybody yet. Search username for up, connect!</p>
+</div>
+
+<h2 style="text-align:center;margin-top:10px">👥 People On Global Connect</h2>
+<div class="people" id="people"></div>
+
+<div id="chatBox">
+  <h3 id="chatWith">Chat</h3>
+  <div id="messages"></div>
+  <input type="text" id="chatInput" placeholder="Type message...">
+  <button id="sendBtn" onclick="sendChat()">Send</button>
+  <br><br><button onclick="closeChat()" style="padding:10px 20px;border:none;border-radius:8px;cursor:pointer">Close Chat</button>
+</div>
+
+<div class="box">
+  <h2>About Global Connect</h2>
+  <p>Owned by <b>Rabiu</b>. Connect the world by username. No need phone number, just username!</p>
+</div>
+
+<footer><p>© 2026 Global Connect | Owner: Rabiu</p></footer>
+
+<script>
+let users = [
+  {name:"Rabiu", username:"@rabiu", bio:"Owner of Global Connect", online:"🟢 Online"},
+  {name:"Fatima", username:"@fatima", bio:"Loves data & business", online:"🟢 Online"},
+  {name:"Ahmed", username:"@ahmed", bio:"Seller in Kano", online:"🟡 Away"},
+  {name:"John", username:"@john", bio:"Student in Lagos", online:"🟢 Online"},
+  {name:"Aisha", username:"@aisha", bio:"Fashion designer", online:"🔴 Offline"},
+  {name:"Musa", username:"@musa", bio:"Tech guy", online:"🟢 Online"},
+  {name:"Grace", username:"@grace", bio:"Music lover", online:"🟢 Online"},
+  {name:"Emeka", username:"@emeka", bio:"Footballer", online:"🟡 Away"},
+];
+let friends = [];
+let currentChat = "";
+
+function displayPeople(list){
+  let box = document.getElementById("people");
+  box.innerHTML = "";
+  list.forEach((u, i) => {
+    let isFriend = friends.includes(u.username);
+    let btnText = isFriend ? "✅ Connected" : "Connect +";
+    let btnClass = isFriend ? "connected" : "connect";
+    box.innerHTML += `
+    <div class="person">
+      <div class="avatar">${u.name.charAt(0)}</div>
+      <h3>${u.name}</h3>
+      <p><b>${u.username}</b></p>
+      <p>${u.bio}</p>
+      <p>${u.online}</p>
+      <button class="${btnClass}" onclick="connectUser('${u.username}')">${btnText}</button>
+      <button class="chat" onclick="openChat('${u.username}','${u.name}')">💬 Chat</button>
+    </div>`;
+  });
+}
+displayPeople(users);
+
+function searchPeople(){
+  let q = document.getElementById("searchUser").value.toLowerCase();
+  let filtered = users.filter(u => u.username.toLowerCase().includes(q) || u.name.toLowerCase().includes(q));
+  displayPeople(filtered);
+  if(filtered.length==0){
+    document.getElementById("people").innerHTML = "<p>No user found for <b>"+q+"</b>. Invite them to join Global Connect!</p>";
+  }
+}
+
+function createProfile(){
+  let name = document.getElementById("myName").value;
+  let user = document.getElementById("myUsername").value;
+  if(name=="" || user==""){ alert("Fill your name and username"); return; }
+  if(!user.startsWith("@")) user = "@" + user;
+  // Add you to list
+  users.unshift({name:name, username:user, bio:"New on Global Connect", online:"🟢 Online"});
+  displayPeople(users);
+  document.getElementById("myProfile").innerText = "Your profile created! People can find you as " + user;
+  alert("Welcome " + name + "! Your username is " + user);
+}
+
+function connectUser(username){
+  if(friends.includes(username)){
+    alert("You already connected with " + username);
+    return;
+  }
+  friends.push(username);
+  document.getElementById("friendCount").innerText = friends.length;
+  document.getElementById("friendList").innerHTML = "Your friends: <b>" + friends.join(", ") + "</b>";
+  displayPeople(users);
+  alert("You don connect with " + username + " ✅ Now you fit chat them!");
+}
+
+function openChat(username, name){
+  currentChat = username;
+  document.getElementById("chatBox").style.display = "block";
+  document.getElementById("chatWith").innerText = name ? "Chat with " + name + " (" + username + ")" : "My Chats";
+  document.getElementById("messages").innerHTML += "<p><b>System:</b> You are now chatting with " + username + "</p>";
+  document.getElementById("chatBox").scrollIntoView({behavior:"smooth"});
+}
+
+function closeChat(){ document.getElementById("chatBox").style.display = "none"; }
+
+function sendChat(){
+  let msg = document.getElementById("chatInput").value;
+  if(msg=="") return;
+  document.getElementById("messages").innerHTML += "<p><b>You:</b> " + msg + "</p>";
+  document.getElementById("chatInput").value = "";
+  // Fake reply
+  setTimeout(()=>{
+    document.getElementById("messages").innerHTML += "<p><b>"+currentChat+":</b> Thanks for messaging me on Global Connect! 🙌</p>";
+  }, 1000);
+}
+</script>
+</body>
+</html>
